@@ -112,7 +112,7 @@ coverage.xml
 # Translations
 *.mo
 *.pot
-
+venv/
 # Sphinx documentation
 docs/_build/
 
