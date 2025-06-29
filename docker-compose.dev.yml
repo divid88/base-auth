@@ -1,0 +1,68 @@
+
+services:
+
+  db:
+    image: postgres:14.1
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=tutorial_python
+      - POSTGRES_USER=david
+      - POSTGRES_PASSWORD=1q2w3e4r
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: 'pg_pass'
+    ports:
+      - "5050:80"
+
+  rabbitmq:
+    image: "rabbitmq:alpine"
+    container_name: rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    ports:
+      - "15672:15672"
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+  
+  mailpit:
+    image: docker.io/axllent/mailpit:v1.15
+    container_name: estate_prod_mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    volumes:  
+      - estate_mailpit_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATA_FILE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1 
+  
+volumes:
+    postgres-data:
+    redis-data:
+    estate_mailpit_data:
+
+# 6. celery -A config.celery_app beat -l INFO
+# 7. celery -A config worker -l INFO
+# celery -A config.celery_app -b redis://localhost:6379/0 flower --basic_auth=david:david12346
+
+#celery -A config.celery_app │  . djcelery_email_send
